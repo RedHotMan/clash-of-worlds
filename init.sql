@@ -1,0 +1,1 @@
+CREATE DATABASE clash_of_worlds
