@@ -1,24 +1,25 @@
+const md5 = require("md5");
 const sequelize = require("../dbConnect");
-const models = require('../models');
+const models = require("../models");
 
 const resolvers = {
   Query: {
     users: async () => {
       return await models.User.findAll();
     },
-    user: async (obj, args, context, info) => {
-      return await models.User.findByPk(args.id);
-    },
+    user: async (_, { id }) => {
+      return await models.User.findByPk(id);
+    }
   },
   Mutation: {
-    createUser: async (obj, args, context, info) => {
+    register: async (_, { registerInput: { username, email, password } }) => {
+      // TODO: validate user data
+      // TODO: Make sure username or user
       return await models.User.create({
-        firstname: args.firstname,
-        lastname: args.lastname,
-        username: args.username,
-        email: args.email,
-        password: args.password,
-      })
+        username,
+        email,
+        password: await md5(password)
+      });
     }
   }
 };
