@@ -3,9 +3,7 @@ const { gql } = require('apollo-server');
 const typeDefs = gql`
   type User {
     id: ID!
-    firstname: String!
-    lastname: String!
-    username: String
+    username: String!
     email: String!
     password: String!
     role: String!

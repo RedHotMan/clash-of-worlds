@@ -1,21 +1,13 @@
 const ROLES = {
-  USER: 'user',
-  ADMIN: 'admin'
+  USER: "user",
+  ADMIN: "admin"
 };
 
 const user = (sequelize, DataTypes) => {
   const User = sequelize.define("user", {
-    firstname: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    lastname: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
     username: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: false
     },
     email: {
       type: DataTypes.STRING,
@@ -33,6 +25,6 @@ const user = (sequelize, DataTypes) => {
   });
 
   return User;
-}
+};
 
 module.exports = user;
