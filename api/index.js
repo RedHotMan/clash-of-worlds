@@ -12,6 +12,7 @@ sequelize
   .authenticate()
   .then(() => {
     console.log("Connection to the database has been established successfully.");
+    sequelize.sync();
     server.listen({ port: 4000 }).then(({ url }) => {
       console.log(`🚀  Server ready at ${url}`);
     });
