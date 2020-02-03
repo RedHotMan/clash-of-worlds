@@ -1,4 +1,5 @@
-const models = require('./models').models;
+const sequelize = require("../dbConnect");
+const models = require('../models');
 
 const resolvers = {
   Query: {
@@ -8,6 +9,8 @@ const resolvers = {
     user: async (obj, args, context, info) => {
       return await models.User.findByPk(args.id);
     },
+  },
+  Mutation: {
     createUser: async (obj, args, context, info) => {
       return await models.User.create({
         firstname: args.firstname,
@@ -15,7 +18,6 @@ const resolvers = {
         username: args.username,
         email: args.email,
         password: args.password,
-        role: args.role,
       })
     }
   }
