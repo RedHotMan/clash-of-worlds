@@ -1,6 +1,7 @@
 const md5 = require("md5");
 const sequelize = require("../dbConnect");
 const models = require("../models");
+const { UserInputError } = require("apollo-server");
 
 const resolvers = {
   Query: {
@@ -14,7 +15,16 @@ const resolvers = {
   Mutation: {
     register: async (_, { registerInput: { username, email, password } }) => {
       // TODO: validate user data
-      // TODO: Make sure username or user
+      const user = await models.User.findOne({ where: { username } });
+
+      if (user) {
+        throw new UserInputError("Username already taken", {
+          errors: {
+            username: `The username ${username} is already taken.`
+          }
+        });
+      }
+
       return await models.User.create({
         username,
         email,
