@@ -2,6 +2,7 @@ const md5 = require("md5");
 const sequelize = require("../dbConnect");
 const models = require("../models");
 const { UserInputError } = require("apollo-server");
+const { registerValidation } = require("../utils/validators");
 
 const resolvers = {
   Query: {
@@ -14,7 +15,12 @@ const resolvers = {
   },
   Mutation: {
     register: async (_, { registerInput: { username, email, password } }) => {
-      // TODO: validate user data
+      const { errors, valid } = registerValidation(username, email, password);
+
+      if (!valid) {
+        throw new UserInputError("Registration error", { errors });
+      }
+
       const user = await models.User.findOne({ where: { username } });
 
       if (user) {
