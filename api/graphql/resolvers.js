@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const sequelize = require("../dbConnect");
 const models = require("../models");
+const { generateToken } = require("../utils/generateToken");
 const { AuthenticationError, UserInputError } = require("apollo-server");
 const { registerValidation, loginValidation } = require("../utils/validators");
 
@@ -31,11 +32,16 @@ const resolvers = {
         });
       }
 
-      return await models.User.create({
+      const newUser = await models.User.create({
         username,
         email,
         password: await bcrypt.hash(password, 12)
       });
+
+      return {
+        ...newUser.dataValues,
+        token: await generateToken(newUser)
+      };
     },
     login: async (_, { username, password }) => {
       const { errors, valid } = loginValidation(username, password);
@@ -51,7 +57,10 @@ const resolvers = {
       }
 
       if (await bcrypt.compare(password, user.password)) {
-        return user;
+        return {
+          ...user.dataValues,
+          token: await generateToken(user)
+        };
       } else {
         throw new AuthenticationError("Wrong credentials");
       }
