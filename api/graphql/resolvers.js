@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const sequelize = require("../dbConnect");
 const models = require("../models");
+const Sequelize = require("sequelize");
 const { generateToken } = require("../utils/generateToken");
 const { AuthenticationError, UserInputError } = require("apollo-server");
 const { registerValidation, loginValidation } = require("../utils/validators");
@@ -22,12 +23,24 @@ const resolvers = {
         throw new UserInputError("Registration error", { errors });
       }
 
-      const user = await models.User.findOne({ where: { username } });
+      const Op = Sequelize.Op;
+      const user = await models.User.findOne({
+        where: {
+          [Op.or]: [{ username }, { email }]
+        }
+      });
 
       if (user) {
-        throw new UserInputError("Username already taken", {
+        throw new UserInputError("Registration error", {
           errors: {
-            username: `The username ${username} is already taken.`
+            username:
+              username === user.username
+                ? `The username ${username} is already taken.`
+                : null,
+            email:
+              email === user.email
+                ? `User with email ${email} already exist`
+                : null
           }
         });
       }
