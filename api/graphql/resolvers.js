@@ -1,8 +1,8 @@
 const md5 = require("md5");
 const sequelize = require("../dbConnect");
 const models = require("../models");
-const { UserInputError } = require("apollo-server");
-const { registerValidation } = require("../utils/validators");
+const { AuthenticationError, UserInputError } = require("apollo-server");
+const { registerValidation, loginValidation } = require("../utils/validators");
 
 const resolvers = {
   Query: {
@@ -36,6 +36,25 @@ const resolvers = {
         email,
         password: await md5(password)
       });
+    },
+    login: async (_, { username, password }) => {
+      const { errors, valid } = loginValidation(username, password);
+
+      if (!valid) {
+        throw new UserInputError("Login error", { errors });
+      }
+
+      const user = await models.User.findOne({ where: { username } });
+
+      if (!user) {
+        throw new AuthenticationError("User not found");
+      }
+
+      if ((await md5(password)) === user.password) {
+        return user;
+      } else {
+        throw new AuthenticationError("Wrong credentials");
+      }
     }
   }
 };
