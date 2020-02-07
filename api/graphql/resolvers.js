@@ -1,4 +1,5 @@
 const md5 = require("md5");
+const bcrypt = require("bcrypt");
 const sequelize = require("../dbConnect");
 const models = require("../models");
 const { AuthenticationError, UserInputError } = require("apollo-server");
@@ -34,7 +35,7 @@ const resolvers = {
       return await models.User.create({
         username,
         email,
-        password: await md5(password)
+        password: await bcrypt.hash(password, 12)
       });
     },
     login: async (_, { username, password }) => {
@@ -50,7 +51,7 @@ const resolvers = {
         throw new AuthenticationError("User not found");
       }
 
-      if ((await md5(password)) === user.password) {
+      if (await bcrypt.compare(password, user.password)) {
         return user;
       } else {
         throw new AuthenticationError("Wrong credentials");
