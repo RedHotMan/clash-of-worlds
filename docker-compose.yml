@@ -1,27 +1,28 @@
-version: '3.1'
+version: "3.1"
 
-services: 
+services:
   api:
-    build: 
+    build:
       context: ./api
-    ports: 
+    ports:
       - 8080:4000
-    depends_on: 
+    depends_on:
       - database
     volumes:
       - ./api:/usr/src/api
+      - /usr/src/api/node_modules/
 
   database:
     image: postgres
     restart: always
-    environment: 
+    environment:
       - POSTGRES_DB=clash_of_worlds
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=root
-    volumes: 
+    volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
       - database:/var/lib/postgresql/data
-    ports: 
+    ports:
       - 5432:5432
 
   adminer:
@@ -30,5 +31,5 @@ services:
     ports:
       - 8801:8080
 
-volumes: 
+volumes:
   database:
