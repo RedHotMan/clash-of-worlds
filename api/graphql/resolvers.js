@@ -16,8 +16,16 @@ const resolvers = {
     }
   },
   Mutation: {
-    register: async (_, { registerInput: { username, email, password } }) => {
-      const { errors, valid } = registerValidation(username, email, password);
+    register: async (
+      _,
+      { registerInput: { username, email, password, role } }
+    ) => {
+      const { errors, valid } = registerValidation(
+        username,
+        email,
+        password,
+        role
+      );
 
       if (!valid) {
         throw new UserInputError("Registration error", { errors });
@@ -48,7 +56,8 @@ const resolvers = {
       const newUser = await models.User.create({
         username,
         email,
-        password: await bcrypt.hash(password, 12)
+        password: await bcrypt.hash(password, 12),
+        role
       });
 
       return {
