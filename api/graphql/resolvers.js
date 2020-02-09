@@ -39,18 +39,14 @@ const resolvers = {
       });
 
       if (user) {
-        throw new UserInputError("Registration error", {
-          errors: {
-            username:
-              username === user.username
-                ? `The username ${username} is already taken.`
-                : null,
-            email:
-              email === user.email
-                ? `User with email ${email} already exist`
-                : null
-          }
-        });
+        if (username === user.username) {
+          errors.username = `The username ${username} is already taken.`;
+        }
+
+        if (email === user.email) {
+          errors.email = `User with email ${email} already exist`;
+        }
+        throw new UserInputError("Registration error", { errors });
       }
 
       const newUser = await models.User.create({
