@@ -1,3 +1,4 @@
+const { Planet } = require("../models");
 const { USER } = require("../utils/roles");
 
 const user = (sequelize, DataTypes) => {
@@ -24,6 +25,14 @@ const user = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
       defaultValue: USER
+    },
+    planetId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Planet,
+        key: "id"
+      }
     }
   });
 
