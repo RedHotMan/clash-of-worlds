@@ -1,7 +1,4 @@
-const ROLES = {
-  USER: "user",
-  ADMIN: "admin"
-};
+const { USER } = require("../utils/roles");
 
 const user = (sequelize, DataTypes) => {
   const User = sequelize.define("user", {
@@ -26,7 +23,7 @@ const user = (sequelize, DataTypes) => {
     role: {
       type: DataTypes.STRING,
       allowNull: false,
-      defaultValue: ROLES.USER
+      defaultValue: USER
     }
   });
 
