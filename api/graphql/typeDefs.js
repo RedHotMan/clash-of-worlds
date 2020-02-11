@@ -11,6 +11,13 @@ const typeDefs = gql`
     planetId: Int!
   }
 
+  type Planet {
+    id: Int!
+    name: String!
+    isInWar: Boolean!
+    leaderId: String!
+  }
+
   input RegisterInput {
     username: String!
     email: String!
@@ -21,6 +28,7 @@ const typeDefs = gql`
   type Query {
     users: [User!]!
     user(id: String!): User
+    planets: [Planet!]!
   }
 
   type Mutation {

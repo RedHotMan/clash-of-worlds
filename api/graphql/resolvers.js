@@ -13,6 +13,9 @@ const resolvers = {
     },
     user: async (_, { id }) => {
       return await models.User.findByPk(id);
+    },
+    planets: async () => {
+      return await models.Planet.findAll();
     }
   },
   Mutation: {
