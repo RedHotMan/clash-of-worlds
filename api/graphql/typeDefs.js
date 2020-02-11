@@ -8,6 +8,7 @@ const typeDefs = gql`
     password: String!
     role: String!
     token: String!
+    planetId: Int!
   }
 
   input RegisterInput {
