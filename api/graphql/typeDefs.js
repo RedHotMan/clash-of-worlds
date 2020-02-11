@@ -29,6 +29,7 @@ const typeDefs = gql`
     users: [User!]!
     user(id: String!): User
     planets: [Planet!]!
+    planet(id: Int!): Planet
   }
 
   type Mutation {
