@@ -1,7 +1,7 @@
 const { ApolloServer } = require("apollo-server");
 const sequelize = require("./dbConnect");
 const { User, Planet } = require("./models");
-const roles = require("./utils/roles");
+const { ROLES } = require("./utils/constants");
 const typeDefs = require("./graphql/typeDefs");
 const resolvers = require("./graphql/resolvers");
 
@@ -28,7 +28,7 @@ sequelize
               username: "admin",
               email: "admin@admin.com",
               password: "admin",
-              role: roles.ADMIN
+              role: ROLES.ADMIN
             }
           ]
         },

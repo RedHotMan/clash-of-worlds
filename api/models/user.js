@@ -1,5 +1,5 @@
 const { Planet } = require("../models");
-const { USER } = require("../utils/roles");
+const { ROLES } = require("../utils/constants");
 
 const user = (sequelize, DataTypes) => {
   const User = sequelize.define("user", {
@@ -24,7 +24,7 @@ const user = (sequelize, DataTypes) => {
     role: {
       type: DataTypes.STRING,
       allowNull: false,
-      defaultValue: USER
+      defaultValue: ROLES.USER
     }
   });
 
