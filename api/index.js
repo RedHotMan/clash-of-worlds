@@ -3,7 +3,7 @@ const sequelize = require("./dbConnect");
 const { User, Planet } = require("./models");
 const { ROLES } = require("./utils/constants");
 const typeDefs = require("./graphql/typeDefs");
-const resolvers = require("./graphql/resolvers");
+const resolvers = require("./graphql/resolvers/index");
 const bcrypt = require("bcrypt");
 
 const server = new ApolloServer({
