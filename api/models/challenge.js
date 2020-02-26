@@ -30,6 +30,12 @@ const challenge = (sequelize, DataTypes) => {
     date: {
       type: DataTypes.DATE,
       allowNull: false
+    },
+    attackerId: {
+      type: DataTypes.INTEGER
+    },
+    defenderId: {
+      type: DataTypes.INTEGER
     }
   });
 

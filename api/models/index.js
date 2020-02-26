@@ -11,13 +11,19 @@ models.Planet.belongsTo(models.User, { as: "leader", constraints: false });
 
 models.Planet.belongsToMany(models.Planet, {
   as: "attacker",
-  through: "challenge",
+  through: {
+    model: models.Challenge,
+    unique: false
+  },
   foreignKey: "attackerId"
 });
 
 models.Planet.belongsToMany(models.Planet, {
   as: "defender",
-  through: "challenge",
+  through: {
+    model: models.Challenge,
+    unique: false
+  },
   foreignKey: "defenderId"
 });
 
