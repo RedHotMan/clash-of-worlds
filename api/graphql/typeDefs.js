@@ -27,6 +27,7 @@ const typeDefs = gql`
     pointsInGame: Int!
     attackerId: Int!
     defenderId: Int!
+    date: String!
   }
 
   input RegisterInput {

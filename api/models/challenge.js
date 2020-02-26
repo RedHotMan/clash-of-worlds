@@ -26,6 +26,10 @@ const challenge = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: 10,
       validate: { min: 10, max: 200 }
+    },
+    date: {
+      type: DataTypes.DATE,
+      allowNull: false
     }
   });
 
