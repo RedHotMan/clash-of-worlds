@@ -44,6 +44,7 @@ const typeDefs = gql`
     planets: [Planet!]!
     planet(id: Int!): Planet
     challenges: [Challenge!]!
+    challenge(id: Int!): Challenge
   }
 
   type Mutation {
