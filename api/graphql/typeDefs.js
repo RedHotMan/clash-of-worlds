@@ -23,6 +23,7 @@ const typeDefs = gql`
     email: String!
     password: String!
     role: String
+    planetId: Int!
   }
 
   type Query {

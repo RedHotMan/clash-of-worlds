@@ -18,17 +18,21 @@ const userResolver = {
     }
   },
   Mutation: {
-    // TODO: Add choice of planet by it's id when registering
     register: async (
       _,
-      { registerInput: { username, email, password, role } }
+      { registerInput: { username, email, password, role, planetId } }
     ) => {
-      const { errors, valid } = registerValidation(
+      let { errors, valid } = registerValidation(
         username,
         email,
         password,
         role
       );
+
+      if ((await models.Planet.findByPk(planetId)) === null) {
+        errors.planet = `The planet selected does not exist.`;
+        valid = false;
+      }
 
       if (!valid) {
         throw new UserInputError("Registration error", { errors });
@@ -56,7 +60,8 @@ const userResolver = {
         username,
         email,
         password: await bcrypt.hash(password, 12),
-        role
+        role,
+        planetId
       });
 
       return {
