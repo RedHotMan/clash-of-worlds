@@ -16,6 +16,7 @@ const typeDefs = gql`
     name: String!
     inGoingChallenges: Int!
     leaderId: String!
+    points: Int!
   }
 
   input RegisterInput {
