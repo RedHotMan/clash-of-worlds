@@ -1,4 +1,7 @@
-const { CHALLENGE_ADMIN_STATE } = require("../utils/constants");
+const {
+  CHALLENGE_ADMIN_STATE,
+  CHALLENGE_WINNER
+} = require("../utils/constants");
 
 const challenge = (sequelize, DataTypes) => {
   const Challenge = sequelize.define("challenge", {
@@ -37,6 +40,13 @@ const challenge = (sequelize, DataTypes) => {
     },
     defenderId: {
       type: DataTypes.INTEGER
+    },
+    winner: {
+      type: DataTypes.ENUM(
+        CHALLENGE_WINNER.ATTACKER,
+        CHALLENGE_WINNER.DEFENDERS
+      ),
+      allowNull: true
     }
   });
 

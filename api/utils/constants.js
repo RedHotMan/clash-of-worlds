@@ -14,3 +14,8 @@ module.exports.CHALLENGE_STATE = {
   ONGOING: "On Going",
   FINISHED: "Finished"
 };
+
+module.exports.CHALLENGE_WINNER = {
+  ATTACKER: "Attackers",
+  DEFENDERS: "Defenders"
+};
