@@ -19,6 +19,16 @@ const typeDefs = gql`
     points: Int!
   }
 
+  type Challenge {
+    id: Int!
+    state: String
+    adminState: String!
+    description: String!
+    pointsInGame: Int!
+    attackerId: Int!
+    defenderId: Int!
+  }
+
   input RegisterInput {
     username: String!
     email: String!
@@ -32,6 +42,7 @@ const typeDefs = gql`
     user(id: String!): User
     planets: [Planet!]!
     planet(id: Int!): Planet
+    challenges: [Challenge!]!
   }
 
   type Mutation {
