@@ -16,7 +16,7 @@ const challenge = (sequelize, DataTypes) => {
       type: DataTypes.TEXT,
       allowNull: false
     },
-    admin_state: {
+    adminState: {
       type: DataTypes.STRING,
       allowNull: false,
       defaultValue: CHALLENGE_ADMIN_STATE.WAITING
