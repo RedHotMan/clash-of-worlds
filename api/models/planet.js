@@ -10,10 +10,10 @@ const planet = (sequelise, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false
     },
-    isInWar: {
-      type: DataTypes.BOOLEAN,
+    inGoingChallenges: {
+      type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: false
+      defaultValue: 0
     }
   });
 

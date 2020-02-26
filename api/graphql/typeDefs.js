@@ -14,7 +14,7 @@ const typeDefs = gql`
   type Planet {
     id: Int!
     name: String!
-    isInWar: Boolean!
+    inGoingChallenges: Int!
     leaderId: String!
   }
 
