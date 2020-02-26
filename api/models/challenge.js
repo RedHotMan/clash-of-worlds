@@ -29,7 +29,8 @@ const challenge = (sequelize, DataTypes) => {
     },
     date: {
       type: DataTypes.DATE,
-      allowNull: false
+      allowNull: false,
+      validate: { isAfter: new Date().toString() }
     },
     attackerId: {
       type: DataTypes.INTEGER
