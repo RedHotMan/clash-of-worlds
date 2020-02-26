@@ -9,7 +9,8 @@ const resolvers = {
     ...challengeResolver.Query
   },
   Mutation: {
-    ...userResolver.Mutation
+    ...userResolver.Mutation,
+    ...challengeResolver.Mutation
   }
 };
 
