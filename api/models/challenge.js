@@ -20,6 +20,12 @@ const challenge = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
       defaultValue: CHALLENGE_ADMIN_STATE.WAITING
+    },
+    pointsInGame: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 10,
+      validate: { min: 10, max: 200 }
     }
   });
 
