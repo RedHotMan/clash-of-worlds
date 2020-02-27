@@ -35,7 +35,10 @@ const challengeResolver = {
         pointsInGame
       });
     },
-    acceptChallenge: async (_, { userId, challengeId }) => {
+    manageChallengeAdminState: async (
+      _,
+      { userId, challengeId, newAdminState }
+    ) => {
       const user = await User.findByPk(userId);
       const challenge = await Challenge.findByPk(challengeId);
 
@@ -59,14 +62,41 @@ const challengeResolver = {
         throw new ApolloError("Challenge error", 403, {
           errors: {
             user:
-              "Only the leader of the defendind planet can accept a challenge"
+              "Only the leader of the defending planet can accept a challenge"
+          }
+        });
+      }
+
+      if (newAdminState === challenge.adminState) {
+        throw new ApolloError("Challenge error", 403, {
+          errors: {
+            adminState: `This challenge adminState is already '${newAdminState}'`
+          }
+        });
+      } else if (newAdminState === CHALLENGE_ADMIN_STATE.WAITING) {
+        throw new ApolloError("Challenge error", 403, {
+          errors: {
+            adminState: "You can not return to a waiting adminState"
+          }
+        });
+      } else if (
+        challenge.adminState === CHALLENGE_ADMIN_STATE.ACCEPTED ||
+        challenge.adminState === CHALLENGE_ADMIN_STATE.REFUSED
+      ) {
+        throw new ApolloError("Challenge error", 403, {
+          errors: {
+            adminState:
+              "You can not change adminState when it's 'Accepted' or 'Refused'"
           }
         });
       }
 
       challenge.update({
-        adminState: CHALLENGE_ADMIN_STATE.ACCEPTED,
-        state: CHALLENGE_STATE.ONGOING
+        adminState: newAdminState,
+        state:
+          newAdminState === CHALLENGE_ADMIN_STATE.ACCEPTED
+            ? CHALLENGE_STATE.ONGOING
+            : CHALLENGE_STATE.FINISHED
       });
 
       return challenge;

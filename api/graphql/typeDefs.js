@@ -57,7 +57,11 @@ const typeDefs = gql`
       date: String!
       pointsInGame: Int!
     ): Challenge
-    acceptChallenge(userId: String!, challengeId: Int!): Challenge
+    manageChallengeAdminState(
+      userId: String!
+      challengeId: Int!
+      newAdminState: String!
+    ): Challenge
   }
 `;
 
