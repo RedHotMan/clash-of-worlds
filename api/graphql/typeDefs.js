@@ -28,6 +28,7 @@ const typeDefs = gql`
     attackerId: Int!
     defenderId: Int!
     date: String!
+    winner: String
   }
 
   input RegisterInput {
