@@ -38,6 +38,7 @@ const challengeResolver = {
         });
       }
 
+      // You have to challenge another planet, not yours
       if (attackerId === defenderId) {
         throw new ApolloError("Challenge error", 403, {
           errors: {
@@ -62,6 +63,7 @@ const challengeResolver = {
       const user = await User.findByPk(userId);
       const challenge = await Challenge.findByPk(challengeId);
 
+      // If the challenge doesn't exist, throw error
       if (challenge === null) {
         throw new ApolloError("Challenge error", 400, {
           errors: {
@@ -72,6 +74,7 @@ const challengeResolver = {
 
       const defenderPlanet = await Planet.findByPk(challenge.defenderId);
 
+      // You have to be a member and the leader of the defending planet to accept or refuse a challenge
       if (user.planetId !== defenderPlanet.id) {
         throw new ApolloError("Challenge error", 403, {
           errors: {
@@ -82,31 +85,37 @@ const challengeResolver = {
         throw new ApolloError("Challenge error", 403, {
           errors: {
             user:
-              "Only the leader of the defending planet can accept a challenge"
+              "Only the leader of the defending planet can accept or refuse a challenge"
           }
         });
       }
 
+      // You have to choose a new adminState
       if (newAdminState === challenge.adminState) {
         throw new ApolloError("Challenge error", 403, {
           errors: {
             adminState: `This challenge adminState is already '${newAdminState}'`
           }
         });
-      } else if (newAdminState === CHALLENGE_ADMIN_STATE.WAITING) {
+      }
+      // You can't set adminState to "Waiting"
+      else if (newAdminState === CHALLENGE_ADMIN_STATE.WAITING) {
         throw new ApolloError("Challenge error", 403, {
           errors: {
             adminState: "You can not return to a waiting adminState"
           }
         });
-      } else if (
+      }
+      // If the challenge is Accepted or Refused, you can't change its adminState
+      else if (
         challenge.adminState === CHALLENGE_ADMIN_STATE.ACCEPTED ||
-        challenge.adminState === CHALLENGE_ADMIN_STATE.REFUSED
+        challenge.adminState === CHALLENGE_ADMIN_STATE.REFUSED ||
+        challenge.adminState === CHALLENGE_ADMIN_STATE.CANCELED
       ) {
         throw new ApolloError("Challenge error", 403, {
           errors: {
             adminState:
-              "You can not change adminState when it's 'Accepted' or 'Refused'"
+              "You can not change adminState when it's 'Accepted', 'Refused' or 'Canceled'"
           }
         });
       }
