@@ -2,7 +2,9 @@ const { Challenge, User, Planet } = require("../../models");
 const { ApolloError } = require("apollo-server");
 const {
   CHALLENGE_ADMIN_STATE,
-  CHALLENGE_STATE
+  CHALLENGE_STATE,
+  ROLES,
+  CHALLENGE_WINNER
 } = require("../../utils/constants");
 
 const findChallengeById = async challengeId => {
@@ -34,6 +36,14 @@ const checkIfUserLeaderOfPlanet = async (user, planet) => {
       }
     });
   }
+};
+
+const incrementAttributeOfPlanet = async (planet, attribute, incrementVal) => {
+  await planet.increment(attribute, { by: incrementVal });
+};
+
+const decrementAttributeOfPlanet = async (planet, attribute, decrementVal) => {
+  await planet.decrement(attribute, { by: decrementVal });
 };
 
 const challengeResolver = {
@@ -165,6 +175,89 @@ const challengeResolver = {
             ? CHALLENGE_STATE.ONGOING
             : CHALLENGE_STATE.FINISHED
       });
+
+      const attackerPlanet = await Planet.findByPk(challenge.attackerId);
+
+      // Increment or decrement inGoingChallenges flag of a planet depending on in going challenges
+      if (challenge.state === CHALLENGE_STATE.ONGOING) {
+        await incrementAttributeOfPlanet(attackerPlanet, "challengeCount", 1);
+        await incrementAttributeOfPlanet(defenderPlanet, "challengeCount", 1);
+      } else if (challenge.state === CHALLENGE_STATE.FINISHED) {
+        await decrementAttributeOfPlanet(attackerPlanet, "challengeCount", 1);
+        await decrementAttributeOfPlanet(defenderPlanet, "challengeCount", 1);
+      }
+
+      return challenge;
+    },
+
+    designateChallengeWinner: async (_, { userId, challengeId, winner }) => {
+      const challenge = await findChallengeById(challengeId);
+      const user = await User.findByPk(userId);
+
+      if (!user.role === ROLES.ADMIN) {
+        throw new ApolloError("Challenger error", 400, {
+          errors: {
+            user: {
+              role: "Only an admin can arbitrate a challenge"
+            }
+          }
+        });
+      }
+
+      if (new Date() < challenge.date) {
+        throw new ApolloError("Challlenge error", 400, {
+          errors: {
+            date:
+              "You can not design a winner for this challenge before the challenge date"
+          }
+        });
+      }
+
+      if (challenge.adminState !== CHALLENGE_ADMIN_STATE.ACCEPTED) {
+        throw new ApolloError("Challenge error", 400, {
+          errors: {
+            adminState: "The challenge hasn't been accepted yet"
+          }
+        });
+      }
+
+      challenge.update({
+        winner,
+        state: CHALLENGE_STATE.FINISHED
+      });
+
+      const attackerPlanet = await Planet.findByPk(challenge.attackerId);
+      const defenderPlanet = await Planet.findByPk(challenge.defenderId);
+
+      if (winner === CHALLENGE_WINNER.ATTACKER) {
+        await incrementAttributeOfPlanet(
+          attackerPlanet,
+          "points",
+          challenge.pointsInGame
+        );
+
+        if (defenderPlanet.points - challenge.pointsInGame / 2 >= 0) {
+          await decrementAttributeOfPlanet(
+            defenderPlanet,
+            "points",
+            challenge.pointsInGame / 2
+          );
+        }
+      } else {
+        await incrementAttributeOfPlanet(
+          defenderPlanet,
+          "points",
+          challenge.pointsInGame
+        );
+
+        if (attackerPlanet.points - challenge.pointsInGame / 2 >= 0) {
+          await decrementAttributeOfPlanet(
+            attackerPlanet,
+            "points",
+            challenge.pointsInGame / 2
+          );
+        }
+      }
 
       return challenge;
     }
