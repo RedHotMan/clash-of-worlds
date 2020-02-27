@@ -17,8 +17,27 @@ const challengeResolver = {
   Mutation: {
     createChallenge: async (
       _,
-      { attackerId, defenderId, description, date, pointsInGame }
+      { userId, attackerId, defenderId, description, date, pointsInGame }
     ) => {
+      const attackerPlanet = await Planet.findByPk(attackerId);
+      const user = await User.findByPk(userId);
+
+      // Only the leader of the attacking planet can launch a challenge
+      if (user.planetId !== attackerPlanet.id) {
+        throw new ApolloError("Challenger error", 403, {
+          errors: {
+            user:
+              "You have to be a member of the attacking planet to launch a challenge"
+          }
+        });
+      } else if (userId !== attackerPlanet.leaderId) {
+        throw new ApolloError("Challenge error", 403, {
+          errors: {
+            user: `Only the leader of the attacking team can launch a challenge`
+          }
+        });
+      }
+
       if (attackerId === defenderId) {
         throw new ApolloError("Challenge error", 403, {
           errors: {
@@ -35,6 +54,7 @@ const challengeResolver = {
         pointsInGame
       });
     },
+
     manageChallengeAdminState: async (
       _,
       { userId, challengeId, newAdminState }

@@ -51,6 +51,7 @@ const typeDefs = gql`
     register(registerInput: RegisterInput): User
     login(username: String!, password: String!): User
     createChallenge(
+      userId: String!
       attackerId: Int!
       defenderId: Int!
       description: String!
