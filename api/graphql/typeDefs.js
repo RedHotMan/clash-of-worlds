@@ -14,7 +14,7 @@ const typeDefs = gql`
   type Planet {
     id: Int!
     name: String!
-    inGoingChallenges: Int!
+    challengeCount: Int!
     leaderId: String!
     points: Int!
   }
