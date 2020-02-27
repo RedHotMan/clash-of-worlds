@@ -63,6 +63,7 @@ const typeDefs = gql`
       challengeId: Int!
       newAdminState: String!
     ): Challenge
+    cancelChallenge(userId: String!, challengeId: Int!): Challenge
   }
 `;
 

@@ -5,6 +5,37 @@ const {
   CHALLENGE_STATE
 } = require("../../utils/constants");
 
+const findChallengeById = async challengeId => {
+  const challenge = await Challenge.findByPk(challengeId);
+
+  // If the challenge doesn't exist, throw error
+  if (challenge === null) {
+    throw new ApolloError("Challenge error", 400, {
+      errors: {
+        challenge: "This challenge does no exist"
+      }
+    });
+  }
+
+  return challenge;
+};
+
+const checkIfUserLeaderOfPlanet = async (user, planet) => {
+  if (user.planetId !== planet.id) {
+    throw new ApolloError("Challenge error", 403, {
+      errors: {
+        user: "You are not a member of the planet"
+      }
+    });
+  } else if (user.id !== planet.leaderId) {
+    throw new ApolloError("Challenge error", 403, {
+      errors: {
+        user: "Only the leader of the planet can accept or refuse a challenge"
+      }
+    });
+  }
+};
+
 const challengeResolver = {
   Query: {
     challenges: async () => {
@@ -56,39 +87,46 @@ const challengeResolver = {
       });
     },
 
+    cancelChallenge: async (_, { userId, challengeId }) => {
+      const user = await User.findByPk(userId);
+      const challenge = await findChallengeById(challengeId);
+      const attackerPlanet = await Planet.findByPk(challenge.attackerId);
+
+      // You have to be a member and the leader of the attacking planet to accept or refuse a challenge
+      await checkIfUserLeaderOfPlanet(user, attackerPlanet);
+
+      // Don't change adminState of challenge if it has already been accepted, refused or canceled
+      if (
+        challenge.adminState === CHALLENGE_ADMIN_STATE.ACCEPTED ||
+        challenge.adminState === CHALLENGE_ADMIN_STATE.REFUSED ||
+        challenge.adminState === CHALLENGE_ADMIN_STATE.CANCELED
+      ) {
+        throw new ApolloError("Challenge error", 403, {
+          errors: {
+            adminState:
+              "The challenge has already been accepted, refused or cnaceled"
+          }
+        });
+      }
+
+      challenge.update({
+        adminState: CHALLENGE_ADMIN_STATE.CANCELED
+      });
+
+      return challenge;
+    },
+
     manageChallengeAdminState: async (
       _,
       { userId, challengeId, newAdminState }
     ) => {
       const user = await User.findByPk(userId);
-      const challenge = await Challenge.findByPk(challengeId);
-
-      // If the challenge doesn't exist, throw error
-      if (challenge === null) {
-        throw new ApolloError("Challenge error", 400, {
-          errors: {
-            challenge: "This challenge does no exist"
-          }
-        });
-      }
+      const challenge = await findChallengeById(challengeId);
 
       const defenderPlanet = await Planet.findByPk(challenge.defenderId);
 
       // You have to be a member and the leader of the defending planet to accept or refuse a challenge
-      if (user.planetId !== defenderPlanet.id) {
-        throw new ApolloError("Challenge error", 403, {
-          errors: {
-            user: "You are not a member of the defender planet"
-          }
-        });
-      } else if (userId !== defenderPlanet.leaderId) {
-        throw new ApolloError("Challenge error", 403, {
-          errors: {
-            user:
-              "Only the leader of the defending planet can accept or refuse a challenge"
-          }
-        });
-      }
+      await checkIfUserLeaderOfPlanet(user, defenderPlanet);
 
       // You have to choose a new adminState
       if (newAdminState === challenge.adminState) {
