@@ -50,6 +50,13 @@ const decrementAttributeOfPlanet = async (planet, attribute, decrementVal) => {
 
 const challengeResolver = {
   Challenge: {
+    id: challenge => challenge.id,
+    date: challenge => moment(challenge.date).format(),
+    state: challenge => challenge.state,
+    adminState: challenge => challenge.adminState,
+    description: challenge => challenge.description,
+    pointsInGame: challenge => challenge.pointsInGame,
+    winner: challenge => challenge.winner,
     attacker: async challenge => {
       return await Planet.findByPk(challenge.attackerId);
     },
