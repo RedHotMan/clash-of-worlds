@@ -1,3 +1,4 @@
+const moment = require("moment");
 const { Challenge, User, Planet } = require("../../models");
 const { ApolloError } = require("apollo-server");
 const {
@@ -98,7 +99,9 @@ const challengeResolver = {
 
       return await Challenge.create({
         description,
-        date,
+        date: moment()
+          .startOf("day")
+          .format(),
         attackerId,
         defenderId,
         pointsInGame
