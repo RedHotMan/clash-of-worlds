@@ -9,6 +9,16 @@ const {
 const generateToken = require("../../utils/generateToken");
 
 const userResolver = {
+  User: {
+    id: user => user.id,
+    username: user => user.username,
+    email: user => user.email,
+    password: user => user.password,
+    role: user => user.role,
+    planet: async user => {
+      return await models.Planet.findByPk(user.planetId);
+    }
+  },
   Query: {
     users: async () => {
       return await models.User.findAll();

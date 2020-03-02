@@ -47,6 +47,14 @@ const decrementAttributeOfPlanet = async (planet, attribute, decrementVal) => {
 };
 
 const challengeResolver = {
+  Challenge: {
+    attacker: async challenge => {
+      return await Planet.findByPk(challenge.attackerId);
+    },
+    defender: async challenge => {
+      return await Planet.findByPk(challenge.defenderId);
+    }
+  },
   Query: {
     challenges: async () => {
       return await Challenge.findAll();

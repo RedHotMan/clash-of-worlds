@@ -7,15 +7,15 @@ const typeDefs = gql`
     email: String!
     password: String!
     role: String!
-    token: String!
-    planetId: Int!
+    token: String
+    planet: Planet
   }
 
   type Planet {
-    id: Int!
+    id: ID!
     name: String!
     challengeCount: Int!
-    leaderId: String!
+    leader: User!
     points: Int!
   }
 
@@ -25,8 +25,8 @@ const typeDefs = gql`
     adminState: String!
     description: String!
     pointsInGame: Int!
-    attackerId: Int!
-    defenderId: Int!
+    attacker: Planet!
+    defender: Planet!
     date: String!
     winner: String
   }
@@ -41,9 +41,9 @@ const typeDefs = gql`
 
   type Query {
     users: [User!]!
-    user(id: String!): User
+    user(id: ID!): User
     planets: [Planet!]!
-    planet(id: Int!): Planet
+    planet(id: ID!): Planet
     challenges: [Challenge!]!
     challenge(id: Int!): Challenge
   }
