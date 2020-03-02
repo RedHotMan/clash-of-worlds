@@ -1,3 +1,4 @@
+const moment = require("moment");
 const { ROLES } = require("./constants");
 
 const validateEmail = email => {
@@ -47,6 +48,25 @@ module.exports.loginValidation = (username, password) => {
 
   if (password.trim().length === 0) {
     errors.password = "Password must not be empty";
+  }
+
+  return {
+    errors,
+    valid: Object.keys(errors).length < 1
+  };
+};
+
+module.exports.createChallengeValidation = (description, date) => {
+  const errors = {};
+
+  if (description.trim().length === 0) {
+    errors.description = "Description must not be empty";
+  }
+
+  if (moment(date, "MM/DD/YYYY").isSameOrBefore(moment().startOf("day"))) {
+    errors.date = `Date must be after yesterday: ${moment()
+      .startOf("day")
+      .format()}`;
   }
 
   return {

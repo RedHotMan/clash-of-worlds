@@ -7,6 +7,7 @@ const {
   ROLES,
   CHALLENGE_WINNER
 } = require("../../utils/constants");
+const { createChallengeValidation } = require("../../utils/validators");
 
 const findChallengeById = async challengeId => {
   const challenge = await Challenge.findByPk(challengeId);
@@ -69,6 +70,14 @@ const challengeResolver = {
       _,
       { userId, attackerId, defenderId, description, date, pointsInGame }
     ) => {
+      const { errors, valid } = createChallengeValidation(description, date);
+
+      if (!valid) {
+        throw new ApolloError("Challenge error", "CHALLENGE_NOT_CREATED", {
+          errors
+        });
+      }
+
       const attackerPlanet = await Planet.findByPk(attackerId);
       const user = await User.findByPk(userId);
 
