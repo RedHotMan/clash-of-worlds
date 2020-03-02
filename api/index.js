@@ -28,10 +28,9 @@ sequelize
             users: [
               {
                 id: "13dc1e5c-eb36-4919-9f8f-4978019dd127",
-                username: "admin",
-                email: "admin@admin.com",
-                password: await bcrypt.hash("admin", 12),
-                role: ROLES.ADMIN
+                username: "Broly",
+                email: "broly@email.com",
+                password: await bcrypt.hash("admin", 12)
               }
             ]
           },
@@ -65,8 +64,8 @@ sequelize
             users: [
               {
                 id: "26d16c57-1629-482b-a7d2-e8dab6097887",
-                username: "Mugen",
-                email: "mugen@email.com",
+                username: "Gohan",
+                email: "gohan@email.com",
                 password: await bcrypt.hash("psswrd", 12)
               }
             ]
@@ -93,6 +92,13 @@ sequelize
             include: [{ association: Planet.hasMany(User) }]
           }
         );
+
+        User.create({
+          id: "d5835597-2b2b-4b87-993f-7f22d4b3583a",
+          username: "admin",
+          email: "admin@email.com",
+          password: await bcrypt.hash("admin", 12)
+        });
       })
       .then(() => {
         server.listen({ port: 4000 }).then(({ url }) => {
