@@ -1,3 +1,4 @@
+const moment = require("moment");
 const {
   CHALLENGE_ADMIN_STATE,
   CHALLENGE_WINNER
@@ -34,9 +35,10 @@ const challenge = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: false,
       validate: {
-        isAfter: new Date(
-          new Date(new Date().getTime() - 86400000).setHours(0, 0, 0, 0)
-        ).toString()
+        isAfter: moment()
+          .subtract(1, "days")
+          .startOf("day")
+          .format()
       }
     },
     attackerId: {
