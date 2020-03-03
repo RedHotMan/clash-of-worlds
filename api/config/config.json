@@ -1,0 +1,9 @@
+{
+  "development": {
+    "username": "root",
+    "password": "root",
+    "database": "clash_of_worlds",
+    "host": "localhost",
+    "dialect": "postgres"
+  }
+}
