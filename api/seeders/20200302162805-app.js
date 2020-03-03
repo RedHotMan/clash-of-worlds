@@ -86,10 +86,50 @@ module.exports = {
     });
 
     await queryInterface.sequelize.query("SELECT * FROM users");
+
+    await queryInterface.bulkInsert("challenges", [
+      {
+        description:
+          "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Integer vitae justo eget magna fermentum iaculis eu non diam.",
+        pointsInGame: 70,
+        date: moment()
+          .add(1, "days")
+          .startOf("day")
+          .format(),
+        attackerId: planets[0][1].id,
+        defenderId: planets[0][3].id,
+        createdAt: moment().format(),
+        updatedAt: moment().format()
+      },
+      {
+        description:
+          "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Integer vitae justo eget magna fermentum iaculis eu non diam.",
+        pointsInGame: 100,
+        date: moment()
+          .add(4, "days")
+          .startOf("day")
+          .format(),
+        attackerId: planets[0][0].id,
+        defenderId: planets[0][1].id,
+        createdAt: moment().format(),
+        updatedAt: moment().format()
+      }
+    ]);
+
+    await queryInterface.sequelize.query(
+      `UPDATE planets SET "challengeCount"=1 WHERE id='${planets[0][0].id}'`
+    );
+    await queryInterface.sequelize.query(
+      `UPDATE planets SET "challengeCount"=2 WHERE id='${planets[0][1].id}'`
+    );
+    await queryInterface.sequelize.query(
+      `UPDATE planets SET "challengeCount"=1 WHERE id='${planets[0][3].id}'`
+    );
   },
 
   down: async (queryInterface, Sequelize) => {
     await queryInterface.bulkDelete("users", null, {});
     await queryInterface.bulkDelete("planets", null, {});
+    await queryInterface.bulkDelete("challenges", null, {});
   }
 };
