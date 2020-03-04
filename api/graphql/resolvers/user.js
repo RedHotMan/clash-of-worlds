@@ -7,6 +7,7 @@ const {
   loginValidation
 } = require("../../utils/validators");
 const generateToken = require("../../utils/generateToken");
+const planetLoader = require("../../loaders/planetLoader");
 
 const userResolver = {
   User: {
@@ -15,8 +16,12 @@ const userResolver = {
     email: user => user.email,
     password: user => user.password,
     role: user => user.role,
-    planet: async user => {
-      return await models.Planet.findByPk(user.planetId);
+    planet: user => {
+      if (user.planetId) {
+        return planetLoader.load(user.planetId);
+      }
+
+      return null;
     }
   },
   Query: {
