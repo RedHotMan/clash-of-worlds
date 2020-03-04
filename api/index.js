@@ -5,10 +5,16 @@ const { ROLES } = require("./utils/constants");
 const typeDefs = require("./graphql/typeDefs");
 const resolvers = require("./graphql/resolvers/index");
 const bcrypt = require("bcrypt");
+const planetLoader = require("./loaders/planetLoader");
 
 const server = new ApolloServer({
   typeDefs,
-  resolvers
+  resolvers,
+  context: () => {
+    return {
+      planetLoader
+    };
+  }
 });
 
 sequelize
