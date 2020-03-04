@@ -101,7 +101,7 @@ const challengeResolver = {
 
       return await Challenge.create({
         description,
-        date: moment()
+        date: moment(date, "MM/DD/YYYY")
           .startOf("day")
           .format(),
         attackerId,
