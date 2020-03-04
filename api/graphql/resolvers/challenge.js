@@ -8,6 +8,7 @@ const {
   CHALLENGE_WINNER
 } = require("../../utils/constants");
 const { createChallengeValidation } = require("../../utils/validators");
+const planetLoader = require("../../loaders/planetLoader");
 
 const findChallengeById = async challengeId => {
   const challenge = await Challenge.findByPk(challengeId);
@@ -57,11 +58,11 @@ const challengeResolver = {
     description: challenge => challenge.description,
     pointsInGame: challenge => challenge.pointsInGame,
     winner: challenge => challenge.winner,
-    attacker: async challenge => {
-      return await Planet.findByPk(challenge.attackerId);
+    attacker: challenge => {
+      return planetLoader.load(challenge.attackerId);
     },
     defender: async challenge => {
-      return await Planet.findByPk(challenge.defenderId);
+      return planetLoader.load(challenge.defenderId);
     }
   },
   Query: {
