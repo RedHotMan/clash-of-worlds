@@ -88,21 +88,7 @@ const challengeResolver = {
       const attackerPlanet = await Planet.findByPk(attackerId);
       const user = await User.findByPk(userId);
 
-      // Only the leader of the attacking planet can launch a challenge
-      if (user.planetId !== attackerPlanet.id) {
-        throw new ApolloError("Challenger error", 403, {
-          errors: {
-            user:
-              "You have to be a member of the attacking planet to launch a challenge"
-          }
-        });
-      } else if (userId !== attackerPlanet.leaderId) {
-        throw new ApolloError("Challenge error", 403, {
-          errors: {
-            user: `Only the leader of the attacking team can launch a challenge`
-          }
-        });
-      }
+      await checkIfUserLeaderOfPlanet(user, attackerPlanet);
 
       // You have to challenge another planet, not yours
       if (attackerId === defenderId) {
