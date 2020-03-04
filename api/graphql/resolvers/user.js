@@ -7,7 +7,6 @@ const {
   loginValidation
 } = require("../../utils/validators");
 const generateToken = require("../../utils/generateToken");
-const planetLoader = require("../../loaders/planetLoader");
 
 const userResolver = {
   User: {
@@ -16,9 +15,9 @@ const userResolver = {
     email: user => user.email,
     password: user => user.password,
     role: user => user.role,
-    planet: user => {
+    planet: (user, _, context) => {
       if (user.planetId) {
-        return planetLoader.load(user.planetId);
+        return context.planetLoader.load(user.planetId);
       }
 
       return null;
@@ -35,7 +34,8 @@ const userResolver = {
   Mutation: {
     register: async (
       _,
-      { registerInput: { username, email, password, role, planetId } }
+      { registerInput: { username, email, password, role, planetId } },
+      context
     ) => {
       let { errors, valid } = registerValidation(
         username,
