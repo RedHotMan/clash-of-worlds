@@ -5,7 +5,6 @@ const planetResolver = {
     id: planet => planet.id,
     name: planet => planet.name,
     points: planet => planet.points,
-    challengeCount: planet => planet.challengeCount,
     leader: async planet => {
       return await models.User.findByPk(planet.leaderId);
     }

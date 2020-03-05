@@ -115,16 +115,6 @@ module.exports = {
         updatedAt: moment().format()
       }
     ]);
-
-    await queryInterface.sequelize.query(
-      `UPDATE planets SET "challengeCount"=1 WHERE id='${planets[0][0].id}'`
-    );
-    await queryInterface.sequelize.query(
-      `UPDATE planets SET "challengeCount"=2 WHERE id='${planets[0][1].id}'`
-    );
-    await queryInterface.sequelize.query(
-      `UPDATE planets SET "challengeCount"=1 WHERE id='${planets[0][3].id}'`
-    );
   },
 
   down: async (queryInterface, Sequelize) => {
