@@ -52,24 +52,28 @@ module.exports = {
       {
         name: "DonutsFactory",
         leaderId: "13dc1e5c-eb36-4919-9f8f-4978019dd127",
+        points: 2000,
         createdAt: moment().format(),
         updatedAt: moment().format()
       },
       {
         name: "RaccoonsOfAsgard",
         leaderId: "48bd03b3-0332-4ed0-b098-bc2da667081c",
+        points: 3500,
         createdAt: moment().format(),
         updatedAt: moment().format()
       },
       {
         name: "DucksInvaders",
         leaderId: "26d16c57-1629-482b-a7d2-e8dab6097887",
+        points: 2300,
         createdAt: moment().format(),
         updatedAt: moment().format()
       },
       {
         name: "SkizoCats",
         leaderId: "f0010344-8011-4f10-82d3-342ba671fb6f",
+        points: 3210,
         createdAt: moment().format(),
         updatedAt: moment().format()
       }
