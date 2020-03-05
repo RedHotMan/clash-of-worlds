@@ -203,7 +203,7 @@ const challengeResolver = {
       return challenge;
     },
 
-    designateChallengeWinner: async (_, { userId, challengeId, winner }) => {
+    setWinnerChallenge: async (_, { userId, challengeId, winner }, context) => {
       const challenge = await findChallengeById(challengeId);
       const user = await User.findByPk(userId);
 

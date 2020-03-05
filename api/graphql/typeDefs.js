@@ -64,7 +64,7 @@ const typeDefs = gql`
       newAdminState: String!
     ): Challenge
     cancelChallenge(userId: String!, challengeId: Int!): Challenge
-    designateChallengeWinner(
+    setWinnerChallenge(
       userId: String!
       challengeId: Int!
       winner: String!
