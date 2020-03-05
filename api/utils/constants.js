@@ -15,7 +15,7 @@ module.exports.CHALLENGE_STATE = {
   FINISHED: "Finished"
 };
 
-module.exports.CHALLENGE_WINNER = {
-  ATTACKER: "Attackers",
-  DEFENDERS: "Defenders"
+module.exports.PLANET_SIDES = {
+  ATTACKER: "Attacker",
+  DEFENDER: "Defender"
 };
