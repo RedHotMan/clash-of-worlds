@@ -5,7 +5,7 @@ const {
   CHALLENGE_ADMIN_STATE,
   CHALLENGE_STATE,
   ROLES,
-  CHALLENGE_WINNER
+  PLANET_SIDES
 } = require("../../utils/constants");
 const { createChallengeValidation } = require("../../utils/validators");
 
@@ -40,12 +40,36 @@ const checkIfUserLeaderOfPlanet = async (user, planet) => {
   }
 };
 
-const incrementAttributeOfPlanet = async (planet, attribute, incrementVal) => {
-  await planet.increment(attribute, { by: incrementVal });
-};
+const manageAdminStateChallenge = async (
+  planetLoader,
+  userId,
+  challengeId,
+  planetSideToCheck
+) => {
+  const user = await User.findByPk(userId);
+  const challenge = await findChallengeById(challengeId);
 
-const decrementAttributeOfPlanet = async (planet, attribute, decrementVal) => {
-  await planet.decrement(attribute, { by: decrementVal });
+  const planet = await planetLoader.load(
+    planetSideToCheck === PLANET_SIDES.ATTACKER
+      ? challenge.attackerId
+      : challenge.defenderId
+  );
+
+  await checkIfUserLeaderOfPlanet(user, planet);
+
+  if (
+    challenge.adminState === CHALLENGE_ADMIN_STATE.ACCEPTED ||
+    challenge.adminState === CHALLENGE_ADMIN_STATE.REFUSED ||
+    challenge.adminState === CHALLENGE_ADMIN_STATE.CANCELED
+  ) {
+    throw new ApolloError("Challenge error", "CHALLENGE_ADMIN_STATE_ERROR", {
+      errors: {
+        adminState: "Challenge is already 'Accepted', 'Refused' or 'Canceled'"
+      }
+    });
+  }
+
+  return challenge;
 };
 
 const challengeResolver = {
@@ -57,11 +81,11 @@ const challengeResolver = {
     description: challenge => challenge.description,
     pointsInGame: challenge => challenge.pointsInGame,
     winner: challenge => challenge.winner,
-    attacker: (challenge, _, context) => {
-      return context.planetLoader.load(challenge.attackerId);
+    attacker: async (challenge, _, context) => {
+      return await context.planetLoader.load(challenge.attackerId);
     },
-    defender: (challenge, _, context) => {
-      return context.planetLoader.load(challenge.defenderId);
+    defender: async (challenge, _, context) => {
+      return await context.planetLoader.load(challenge.defenderId);
     }
   },
   Query: {
@@ -75,7 +99,8 @@ const challengeResolver = {
   Mutation: {
     createChallenge: async (
       _,
-      { userId, attackerId, defenderId, description, date, pointsInGame }
+      { userId, attackerId, defenderId, description, date, pointsInGame },
+      context
     ) => {
       const { errors, valid } = createChallengeValidation(description, date);
 
@@ -85,7 +110,7 @@ const challengeResolver = {
         });
       }
 
-      const attackerPlanet = await Planet.findByPk(attackerId);
+      const attackerPlanet = await context.planetLoader.load(attackerId);
       const user = await User.findByPk(userId);
 
       await checkIfUserLeaderOfPlanet(user, attackerPlanet);
@@ -110,97 +135,45 @@ const challengeResolver = {
       });
     },
 
-    cancelChallenge: async (_, { userId, challengeId }) => {
-      const user = await User.findByPk(userId);
-      const challenge = await findChallengeById(challengeId);
-      const attackerPlanet = await Planet.findByPk(challenge.attackerId);
+    cancelChallenge: async (_, { userId, challengeId }, context) => {
+      const challenge = await manageAdminStateChallenge(
+        context.planetLoader,
+        userId,
+        challengeId,
+        PLANET_SIDES.ATTACKER
+      );
 
-      // You have to be a member and the leader of the attacking planet to accept or refuse a challenge
-      await checkIfUserLeaderOfPlanet(user, attackerPlanet);
-
-      // Don't change adminState of challenge if it has already been accepted, refused or canceled
-      if (
-        challenge.adminState === CHALLENGE_ADMIN_STATE.ACCEPTED ||
-        challenge.adminState === CHALLENGE_ADMIN_STATE.REFUSED ||
-        challenge.adminState === CHALLENGE_ADMIN_STATE.CANCELED
-      ) {
-        throw new ApolloError("Challenge error", 403, {
-          errors: {
-            adminState:
-              "The challenge has already been accepted, refused or cnaceled"
-          }
-        });
-      }
-
-      challenge.update({
+      return challenge.update({
         adminState: CHALLENGE_ADMIN_STATE.CANCELED
       });
-
-      return challenge;
     },
 
-    manageChallengeAdminState: async (
-      _,
-      { userId, challengeId, newAdminState }
-    ) => {
-      const user = await User.findByPk(userId);
-      const challenge = await findChallengeById(challengeId);
+    acceptChallenge: async (_, { userId, challengeId }, context) => {
+      const challenge = await manageAdminStateChallenge(
+        context.planetLoader,
+        userId,
+        challengeId,
+        PLANET_SIDES.DEFENDER
+      );
 
-      const defenderPlanet = await Planet.findByPk(challenge.defenderId);
-
-      // You have to be a member and the leader of the defending planet to accept or refuse a challenge
-      await checkIfUserLeaderOfPlanet(user, defenderPlanet);
-
-      // You have to choose a new adminState
-      if (newAdminState === challenge.adminState) {
-        throw new ApolloError("Challenge error", 403, {
-          errors: {
-            adminState: `This challenge adminState is already '${newAdminState}'`
-          }
-        });
-      }
-      // You can't set adminState to "Waiting"
-      else if (newAdminState === CHALLENGE_ADMIN_STATE.WAITING) {
-        throw new ApolloError("Challenge error", 403, {
-          errors: {
-            adminState: "You can not return to a waiting adminState"
-          }
-        });
-      }
-      // If the challenge is Accepted or Refused, you can't change its adminState
-      else if (
-        challenge.adminState === CHALLENGE_ADMIN_STATE.ACCEPTED ||
-        challenge.adminState === CHALLENGE_ADMIN_STATE.REFUSED ||
-        challenge.adminState === CHALLENGE_ADMIN_STATE.CANCELED
-      ) {
-        throw new ApolloError("Challenge error", 403, {
-          errors: {
-            adminState:
-              "You can not change adminState when it's 'Accepted', 'Refused' or 'Canceled'"
-          }
-        });
-      }
-
-      challenge.update({
-        adminState: newAdminState,
-        state:
-          newAdminState === CHALLENGE_ADMIN_STATE.ACCEPTED
-            ? CHALLENGE_STATE.ONGOING
-            : CHALLENGE_STATE.FINISHED
+      return challenge.update({
+        adminState: CHALLENGE_ADMIN_STATE.ACCEPTED,
+        state: CHALLENGE_STATE.ONGOING
       });
+    },
 
-      const attackerPlanet = await Planet.findByPk(challenge.attackerId);
+    refuseChallenge: async (_, { userId, challengeId }, context) => {
+      const challenge = await manageAdminStateChallenge(
+        context.planetLoader,
+        userId,
+        challengeId,
+        PLANET_SIDES.DEFENDER
+      );
 
-      // Increment or decrement inGoingChallenges flag of a planet depending on in going challenges
-      if (challenge.state === CHALLENGE_STATE.ONGOING) {
-        await incrementAttributeOfPlanet(attackerPlanet, "challengeCount", 1);
-        await incrementAttributeOfPlanet(defenderPlanet, "challengeCount", 1);
-      } else if (challenge.state === CHALLENGE_STATE.FINISHED) {
-        await decrementAttributeOfPlanet(attackerPlanet, "challengeCount", 1);
-        await decrementAttributeOfPlanet(defenderPlanet, "challengeCount", 1);
-      }
-
-      return challenge;
+      return challenge.update({
+        adminState: CHALLENGE_ADMIN_STATE.REFUSED,
+        state: CHALLENGE_STATE.FINISHED
+      });
     },
 
     setWinnerChallenge: async (_, { userId, challengeId, winner }, context) => {
@@ -211,13 +184,13 @@ const challengeResolver = {
         throw new ApolloError("Challenger error", 400, {
           errors: {
             user: {
-              role: "Only an admin can arbitrate a challenge"
+              role: "Only an admin can set the winner of a challenge"
             }
           }
         });
       }
 
-      if (new Date() < challenge.date) {
+      if (moment().isBefore(moment(challenge.date))) {
         throw new ApolloError("Challlenge error", 400, {
           errors: {
             date:
@@ -239,36 +212,32 @@ const challengeResolver = {
         state: CHALLENGE_STATE.FINISHED
       });
 
-      const attackerPlanet = await Planet.findByPk(challenge.attackerId);
-      const defenderPlanet = await Planet.findByPk(challenge.defenderId);
+      const attackerPlanet = await context.planetLoader.load(
+        challenge.attackerId
+      );
+      const defenderPlanet = await context.planetLoader.load(
+        challenge.defenderId
+      );
 
-      if (winner === CHALLENGE_WINNER.ATTACKER) {
-        await incrementAttributeOfPlanet(
-          attackerPlanet,
-          "points",
-          challenge.pointsInGame
-        );
+      if (winner === PLANET_SIDES.ATTACKER) {
+        await attackerPlanet.increment("points", {
+          by: challenge.pointsInGame
+        });
 
         if (defenderPlanet.points - challenge.pointsInGame / 2 >= 0) {
-          await decrementAttributeOfPlanet(
-            defenderPlanet,
-            "points",
-            challenge.pointsInGame / 2
-          );
+          await defenderPlanet.decrement("points", {
+            by: challenge.pointsInGame / 2
+          });
         }
       } else {
-        await incrementAttributeOfPlanet(
-          defenderPlanet,
-          "points",
-          challenge.pointsInGame
-        );
+        await defenderPlanet.increment("points", {
+          by: challenge.pointsInGame
+        });
 
         if (attackerPlanet.points - challenge.pointsInGame / 2 >= 0) {
-          await decrementAttributeOfPlanet(
-            attackerPlanet,
-            "points",
-            challenge.pointsInGame / 2
-          );
+          await attackerPlanet.decrement("points", {
+            by: challenge.pointsInGame / 2
+          });
         }
       }
 
