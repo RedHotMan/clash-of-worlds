@@ -15,9 +15,9 @@ const userResolver = {
     email: user => user.email,
     password: user => user.password,
     role: user => user.role,
-    planet: (user, _, context) => {
+    planet: async (user, _, context) => {
       if (user.planetId) {
-        return context.planetLoader.load(user.planetId);
+        return await context.planetLoader.load(user.planetId);
       }
 
       return null;
@@ -44,7 +44,7 @@ const userResolver = {
         role
       );
 
-      if ((await models.Planet.findByPk(planetId)) === null) {
+      if ((await context.planetLoader.load(planetId)) == null) {
         errors.planet = `The planet selected does not exist.`;
         valid = false;
       }
