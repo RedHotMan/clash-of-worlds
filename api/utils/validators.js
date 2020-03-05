@@ -63,7 +63,7 @@ module.exports.createChallengeValidation = (description, date) => {
     errors.description = "Description must not be empty";
   }
 
-  if (moment(date, "MM/DD/YYYY").isSameOrBefore(moment().startOf("day"))) {
+  if (moment(date, "MM/DD/YYYY").isBefore(moment().startOf("day"))) {
     errors.date = `Date must be after yesterday: ${moment()
       .startOf("day")
       .format()}`;
