@@ -9,8 +9,8 @@ const {
 } = require("../../utils/constants");
 const { createChallengeValidation } = require("../../utils/validators");
 
-const findChallengeById = async challengeId => {
-  const challenge = await Challenge.findByPk(challengeId);
+const findChallengeById = async (challengeId, challengeLoader) => {
+  const challenge = await challengeLoader(challengeId);
 
   // If the challenge doesn't exist, throw error
   if (challenge === null) {
@@ -41,15 +41,18 @@ const checkIfUserLeaderOfPlanet = async (user, planet) => {
 };
 
 const manageAdminStateChallenge = async (
-  planetLoader,
+  context,
   userId,
   challengeId,
   planetSideToCheck
 ) => {
-  const user = await User.findByPk(userId);
-  const challenge = await findChallengeById(challengeId);
+  const user = await context.userLoader.load(userId);
+  const challenge = await findChallengeById(
+    challengeId,
+    context.challengeLoader
+  );
 
-  const planet = await planetLoader.load(
+  const planet = await context.planetLoader.load(
     planetSideToCheck === PLANET_SIDES.ATTACKER
       ? challenge.attackerId
       : challenge.defenderId
@@ -92,8 +95,8 @@ const challengeResolver = {
     challenges: async () => {
       return await Challenge.findAll();
     },
-    challenge: async (_, { id }) => {
-      return await Challenge.findByPk(id);
+    challenge: async (_, { id }, context) => {
+      return await context.challengeLoader.load(id);
     }
   },
   Mutation: {
@@ -111,7 +114,7 @@ const challengeResolver = {
       }
 
       const attackerPlanet = await context.planetLoader.load(attackerId);
-      const user = await User.findByPk(userId);
+      const user = await context.userLoader.load(userId);
 
       await checkIfUserLeaderOfPlanet(user, attackerPlanet);
 
@@ -137,7 +140,7 @@ const challengeResolver = {
 
     cancelChallenge: async (_, { userId, challengeId }, context) => {
       const challenge = await manageAdminStateChallenge(
-        context.planetLoader,
+        context,
         userId,
         challengeId,
         PLANET_SIDES.ATTACKER
@@ -150,7 +153,7 @@ const challengeResolver = {
 
     acceptChallenge: async (_, { userId, challengeId }, context) => {
       const challenge = await manageAdminStateChallenge(
-        context.planetLoader,
+        context,
         userId,
         challengeId,
         PLANET_SIDES.DEFENDER
@@ -164,7 +167,7 @@ const challengeResolver = {
 
     refuseChallenge: async (_, { userId, challengeId }, context) => {
       const challenge = await manageAdminStateChallenge(
-        context.planetLoader,
+        context,
         userId,
         challengeId,
         PLANET_SIDES.DEFENDER
@@ -177,8 +180,11 @@ const challengeResolver = {
     },
 
     setWinnerChallenge: async (_, { userId, challengeId, winner }, context) => {
-      const challenge = await findChallengeById(challengeId);
-      const user = await User.findByPk(userId);
+      const challenge = await findChallengeById(
+        challengeId,
+        context.challengeLoader
+      );
+      const user = await context.userLoader.load(userId);
 
       if (!user.role === ROLES.ADMIN) {
         throw new ApolloError("Challenger error", 400, {

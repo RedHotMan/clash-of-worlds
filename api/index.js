@@ -6,13 +6,17 @@ const typeDefs = require("./graphql/typeDefs");
 const resolvers = require("./graphql/resolvers/index");
 const bcrypt = require("bcrypt");
 const planetLoader = require("./loaders/planetLoader");
+const userLoader = require("./loaders/userLoader");
+const challengeLoader = require("./loaders/challengeLoader");
 
 const server = new ApolloServer({
   typeDefs,
   resolvers,
   context: () => {
     return {
-      planetLoader
+      planetLoader,
+      userLoader,
+      challengeLoader
     };
   }
 });

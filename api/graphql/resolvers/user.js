@@ -27,8 +27,8 @@ const userResolver = {
     users: async () => {
       return await models.User.findAll();
     },
-    user: async (_, { id }) => {
-      return await models.User.findByPk(id);
+    user: async (_, { id }, context) => {
+      return await context.userLoader.load(id);
     }
   },
   Mutation: {
