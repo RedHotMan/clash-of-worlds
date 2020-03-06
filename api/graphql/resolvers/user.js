@@ -24,11 +24,35 @@ const userResolver = {
     }
   },
   Query: {
-    users: async () => {
+    users: async (_, args, { decodedToken }) => {
+      if (!decodedToken) {
+        throw new AuthenticationError("You must be authenticated");
+      }
       return await models.User.findAll();
     },
     user: async (_, { id }, context) => {
       return await context.userLoader.load(id);
+    },
+    login: async (_, { username, password }) => {
+      const { errors, valid } = loginValidation(username, password);
+
+      if (!valid) {
+        throw new UserInputError("Login error", { errors });
+      }
+
+      const user = await models.User.findOne({ where: { username } });
+
+      if (!user) {
+        throw new AuthenticationError("User not found");
+      }
+
+      if (await bcrypt.compare(password, user.password)) {
+        return {
+          token: await generateToken(user)
+        };
+      } else {
+        throw new AuthenticationError("Wrong credentials");
+      }
     }
   },
   Mutation: {
@@ -80,31 +104,8 @@ const userResolver = {
       });
 
       return {
-        ...newUser.dataValues,
         token: await generateToken(newUser)
       };
-    },
-    login: async (_, { username, password }) => {
-      const { errors, valid } = loginValidation(username, password);
-
-      if (!valid) {
-        throw new UserInputError("Login error", { errors });
-      }
-
-      const user = await models.User.findOne({ where: { username } });
-
-      if (!user) {
-        throw new AuthenticationError("User not found");
-      }
-
-      if (await bcrypt.compare(password, user.password)) {
-        return {
-          ...user.dataValues,
-          token: await generateToken(user)
-        };
-      } else {
-        throw new AuthenticationError("Wrong credentials");
-      }
     }
   }
 };

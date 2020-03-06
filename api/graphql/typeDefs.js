@@ -7,8 +7,11 @@ const typeDefs = gql`
     email: String!
     password: String!
     role: String!
-    token: String
     planet: Planet
+  }
+
+  type Token {
+    token: String
   }
 
   type Planet {
@@ -39,6 +42,7 @@ const typeDefs = gql`
   }
 
   type Query {
+    login(username: String!, password: String!): Token!
     users: [User!]!
     user(id: ID!): User
     planets: [Planet!]!
@@ -48,8 +52,7 @@ const typeDefs = gql`
   }
 
   type Mutation {
-    register(registerInput: RegisterInput): User
-    login(username: String!, password: String!): User
+    register(registerInput: RegisterInput): Token!
     createChallenge(
       userId: String!
       attackerId: Int!
