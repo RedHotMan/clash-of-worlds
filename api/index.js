@@ -5,9 +5,7 @@ const { ROLES } = require("./utils/constants");
 const typeDefs = require("./graphql/typeDefs");
 const resolvers = require("./graphql/resolvers/index");
 const bcrypt = require("bcrypt");
-const planetLoader = require("./loaders/planetLoader");
-const userLoader = require("./loaders/userLoader");
-const challengeLoader = require("./loaders/challengeLoader");
+const { planetLoader, userLoader, challengeLoader } = require("./loaders");
 
 const server = new ApolloServer({
   typeDefs,
