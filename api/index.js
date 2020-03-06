@@ -6,12 +6,15 @@ const typeDefs = require("./graphql/typeDefs");
 const resolvers = require("./graphql/resolvers/index");
 const bcrypt = require("bcrypt");
 const { planetLoader, userLoader, challengeLoader } = require("./loaders");
+const decodeToken = require("./utils/decodeToken");
 
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  context: () => {
+  context: async ({ req }) => {
+    const decodedToken = await decodeToken(req);
     return {
+      decodedToken,
       planetLoader,
       userLoader,
       challengeLoader
