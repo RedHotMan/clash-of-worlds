@@ -15,6 +15,7 @@ stop: ## Stop project
 reset: ## Reset project
 	${MAKE} docker.destroy && ${MAKE} docker.build && ${MAKE} docker.up ARG=-d
 
+include makefiles/client.mk
 include makefiles/api.mk
 include makefiles/database.mk
 include makefiles/docker.mk

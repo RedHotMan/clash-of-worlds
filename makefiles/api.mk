@@ -1,5 +1,5 @@
 ### API
 # ¯¯¯¯¯¯¯¯
 
-api.install: ## Install project and reset db
+api.install: ## Install api dependencies
 	cd api && yarn install
