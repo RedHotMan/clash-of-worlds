@@ -12,6 +12,17 @@ services:
       - ./api:/usr/src/api
       - /usr/src/api/node_modules/
 
+  client:
+    build:
+      context: ./client
+    ports:
+      - 3003:3000
+    depends_on:
+      - api
+    volumes:
+      - ./client:/usr/src/client
+      - /usr/src/client/node_modules/
+
   database:
     image: postgres
     restart: always
