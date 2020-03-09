@@ -7,6 +7,7 @@ const {
   loginValidation
 } = require("../../utils/validators");
 const generateToken = require("../../utils/generateToken");
+const isAuthenticated = require("../../utils/isAuthenticated");
 
 const userResolver = {
   User: {
@@ -25,13 +26,12 @@ const userResolver = {
   },
   Query: {
     users: async (_, args, { decodedToken }) => {
-      if (!decodedToken) {
-        throw new AuthenticationError("You must be authenticated");
-      }
+      isAuthenticated(decodedToken);
       return await models.User.findAll();
     },
-    user: async (_, { id }, context) => {
-      return await context.userLoader.load(id);
+    user: async (_, { id }, { decodedToken, userLoader }) => {
+      isAuthenticated(decodedToken);
+      return await userLoader.load(id);
     },
     login: async (_, { username, password }) => {
       const { errors, valid } = loginValidation(username, password);

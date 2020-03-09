@@ -8,12 +8,13 @@ const {
   PLANET_SIDES
 } = require("../../utils/constants");
 const { createChallengeValidation } = require("../../utils/validators");
+const isAuthenticated = require("../../utils/isAuthenticated");
 
 const findChallengeById = async (challengeId, challengeLoader) => {
-  const challenge = await challengeLoader(challengeId);
+  const challenge = await challengeLoader.load(challengeId);
 
   // If the challenge doesn't exist, throw error
-  if (challenge === null) {
+  if (challenge == null) {
     throw new ApolloError("Challenge error", 400, {
       errors: {
         challenge: "This challenge does no exist"
@@ -92,11 +93,13 @@ const challengeResolver = {
     }
   },
   Query: {
-    challenges: async () => {
+    challenges: async (_, args, { decodedToken }) => {
+      isAuthenticated(decodedToken);
       return await Challenge.findAll();
     },
-    challenge: async (_, { id }, context) => {
-      return await context.challengeLoader.load(id);
+    challenge: async (_, { id }, { challengeLoader, decodedToken }) => {
+      isAuthenticated(decodedToken);
+      return await challengeLoader.load(id);
     }
   },
   Mutation: {
@@ -105,6 +108,7 @@ const challengeResolver = {
       { userId, attackerId, defenderId, description, date, pointsInGame },
       context
     ) => {
+      isAuthenticated(context.decodedToken);
       const { errors, valid } = createChallengeValidation(description, date);
 
       if (!valid) {
@@ -139,6 +143,7 @@ const challengeResolver = {
     },
 
     cancelChallenge: async (_, { userId, challengeId }, context) => {
+      isAuthenticated(context.decodedToken);
       const challenge = await manageAdminStateChallenge(
         context,
         userId,
@@ -152,6 +157,7 @@ const challengeResolver = {
     },
 
     acceptChallenge: async (_, { userId, challengeId }, context) => {
+      isAuthenticated(context.decodedToken);
       const challenge = await manageAdminStateChallenge(
         context,
         userId,
@@ -166,6 +172,7 @@ const challengeResolver = {
     },
 
     refuseChallenge: async (_, { userId, challengeId }, context) => {
+      isAuthenticated(context.decodedToken);
       const challenge = await manageAdminStateChallenge(
         context,
         userId,
@@ -180,6 +187,7 @@ const challengeResolver = {
     },
 
     setWinnerChallenge: async (_, { userId, challengeId, winner }, context) => {
+      isAuthenticated(context.decodedToken);
       const challenge = await findChallengeById(
         challengeId,
         context.challengeLoader

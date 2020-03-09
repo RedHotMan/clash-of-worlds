@@ -1,4 +1,5 @@
 const models = require("../../models");
+const isAuthenticated = require("../../utils/isAuthenticated");
 
 const planetResolver = {
   Planet: {
@@ -10,11 +11,13 @@ const planetResolver = {
     }
   },
   Query: {
-    planets: async () => {
+    planets: async (_, args, { decodedToken }) => {
+      isAuthenticated(decodedToken);
       return await models.Planet.findAll();
     },
-    planet: async (_, { id }, context) => {
-      return await context.planetLoader.load(id);
+    planet: async (_, { id }, { decodedToken, planetLoader }) => {
+      isAuthenticated(decodedToken);
+      return await planetLoader.load(id);
     }
   }
 };
