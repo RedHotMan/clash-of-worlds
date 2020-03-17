@@ -4,7 +4,7 @@
 # ¯¯¯¯¯¯¯¯
 
 install: ## Install project
-	${MAKE} api.install
+	${MAKE} api.install && ${MAKE} client.install
 
 start: ## Start project
 	${MAKE} docker.up ARG=-d
