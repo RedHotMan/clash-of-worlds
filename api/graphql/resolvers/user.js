@@ -7,7 +7,6 @@ const {
   loginValidation
 } = require("../../utils/validators");
 const generateToken = require("../../utils/generateToken");
-const isAuthenticated = require("../../utils/isAuthenticated");
 
 const userResolver = {
   User: {
@@ -25,12 +24,10 @@ const userResolver = {
     }
   },
   Query: {
-    users: async (_, args, { decodedToken }) => {
-      isAuthenticated(decodedToken);
+    users: async () => {
       return await models.User.findAll();
     },
-    user: async (_, { id }, { decodedToken, userLoader }) => {
-      isAuthenticated(decodedToken);
+    user: async (_, { id }, { userLoader }) => {
       return await userLoader.load(id);
     },
     login: async (_, { username, password }) => {

@@ -8,7 +8,6 @@ const {
   PLANET_SIDES
 } = require("../../utils/constants");
 const { createChallengeValidation } = require("../../utils/validators");
-const isAuthenticated = require("../../utils/isAuthenticated");
 
 const findChallengeById = async (challengeId, challengeLoader) => {
   const challenge = await challengeLoader.load(challengeId);
@@ -93,12 +92,10 @@ const challengeResolver = {
     }
   },
   Query: {
-    challenges: async (_, args, { decodedToken }) => {
-      isAuthenticated(decodedToken);
+    challenges: async () => {
       return await Challenge.findAll();
     },
-    challenge: async (_, { id }, { challengeLoader, decodedToken }) => {
-      isAuthenticated(decodedToken);
+    challenge: async (_, { id }, { challengeLoader }) => {
       return await challengeLoader.load(id);
     }
   },
@@ -108,7 +105,6 @@ const challengeResolver = {
       { userId, attackerId, defenderId, description, date, pointsInGame },
       context
     ) => {
-      isAuthenticated(context.decodedToken);
       const { errors, valid } = createChallengeValidation(description, date);
 
       if (!valid) {
@@ -142,8 +138,7 @@ const challengeResolver = {
       });
     },
 
-    cancelChallenge: async (_, { userId, challengeId }, context) => {
-      isAuthenticated(context.decodedToken);
+    cancelChallenge: async (_, { userId, challengeId }) => {
       const challenge = await manageAdminStateChallenge(
         context,
         userId,
@@ -156,8 +151,7 @@ const challengeResolver = {
       });
     },
 
-    acceptChallenge: async (_, { userId, challengeId }, context) => {
-      isAuthenticated(context.decodedToken);
+    acceptChallenge: async (_, { userId, challengeId }) => {
       const challenge = await manageAdminStateChallenge(
         context,
         userId,
@@ -171,8 +165,7 @@ const challengeResolver = {
       });
     },
 
-    refuseChallenge: async (_, { userId, challengeId }, context) => {
-      isAuthenticated(context.decodedToken);
+    refuseChallenge: async (_, { userId, challengeId }) => {
       const challenge = await manageAdminStateChallenge(
         context,
         userId,
@@ -186,8 +179,7 @@ const challengeResolver = {
       });
     },
 
-    setWinnerChallenge: async (_, { userId, challengeId, winner }, context) => {
-      isAuthenticated(context.decodedToken);
+    setWinnerChallenge: async (_, { userId, challengeId, winner }) => {
       const challenge = await findChallengeById(
         challengeId,
         context.challengeLoader
