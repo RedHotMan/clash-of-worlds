@@ -7,6 +7,7 @@ const resolvers = require("./graphql/resolvers/index");
 const bcrypt = require("bcrypt");
 const { planetLoader, userLoader, challengeLoader } = require("./loaders");
 const decodeToken = require("./utils/decodeToken");
+const directives = require("./graphql/directives");
 
 const server = new ApolloServer({
   typeDefs,
@@ -19,6 +20,12 @@ const server = new ApolloServer({
       userLoader,
       challengeLoader
     };
+  },
+  schemaDirectives: {
+    string: directives.StringConstraintDirective,
+    date: directives.DateConstraintDirective,
+    number: directives.NumberConstraintDirective,
+    auth: directives.AuthDirective
   }
 });
 
