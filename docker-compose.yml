@@ -27,9 +27,9 @@ services:
     image: postgres
     restart: always
     environment:
-      - POSTGRES_DB=clash_of_worlds
-      - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=${DATABASE_NAME}
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
       - database:/var/lib/postgresql/data
