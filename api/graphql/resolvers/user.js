@@ -1,11 +1,11 @@
 const bcrypt = require("bcrypt");
 const models = require("../../models");
 const Sequelize = require("sequelize");
-const { AuthenticationError, UserInputError } = require("apollo-server");
 const {
-  registerValidation,
-  loginValidation
-} = require("../../utils/validators");
+  AuthenticationError,
+  UserInputError,
+  ApolloError
+} = require("apollo-server");
 const generateToken = require("../../utils/generateToken");
 
 const userResolver = {
@@ -31,12 +31,6 @@ const userResolver = {
       return await userLoader.load(id);
     },
     login: async (_, { username, password }) => {
-      const { errors, valid } = loginValidation(username, password);
-
-      if (!valid) {
-        throw new UserInputError("Login error", { errors });
-      }
-
       const user = await models.User.findOne({ where: { username } });
 
       if (!user) {
@@ -58,20 +52,10 @@ const userResolver = {
       { registerInput: { username, email, password, role, planetId } },
       context
     ) => {
-      let { errors, valid } = registerValidation(
-        username,
-        email,
-        password,
-        role
-      );
-
       if ((await context.planetLoader.load(planetId)) == null) {
-        errors.planet = `The planet selected does not exist.`;
-        valid = false;
-      }
-
-      if (!valid) {
-        throw new UserInputError("Registration error", { errors });
+        throw new UserInputError("Registration error", {
+          errors: { planetId: "The selected planet does not exist" }
+        });
       }
 
       const Op = Sequelize.Op;
@@ -82,6 +66,8 @@ const userResolver = {
       });
 
       if (user) {
+        const errors = {};
+
         if (username === user.username) {
           errors.username = `The username ${username} is already taken.`;
         }

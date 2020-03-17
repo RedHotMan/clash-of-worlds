@@ -7,7 +7,6 @@ const {
   ROLES,
   PLANET_SIDES
 } = require("../../utils/constants");
-const { createChallengeValidation } = require("../../utils/validators");
 
 const findChallengeById = async (challengeId, challengeLoader) => {
   const challenge = await challengeLoader.load(challengeId);
@@ -102,17 +101,18 @@ const challengeResolver = {
   Mutation: {
     createChallenge: async (
       _,
-      { userId, attackerId, defenderId, description, date, pointsInGame },
+      {
+        createChallengeInput: {
+          userId,
+          attackerId,
+          defenderId,
+          description,
+          date,
+          pointsInGame
+        }
+      },
       context
     ) => {
-      const { errors, valid } = createChallengeValidation(description, date);
-
-      if (!valid) {
-        throw new ApolloError("Challenge error", "CHALLENGE_NOT_CREATED", {
-          errors
-        });
-      }
-
       const attackerPlanet = await context.planetLoader.load(attackerId);
       const user = await context.userLoader.load(userId);
 
