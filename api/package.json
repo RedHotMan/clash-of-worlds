@@ -6,7 +6,7 @@
   "author": "Ilyaçe Regaibi",
   "license": "MIT",
   "dependencies": {
-    "apollo-server": "^2.9.16",
+    "apollo-server": "^2.25.3",
     "bcrypt": "^3.0.8",
     "dataloader": "^2.0.0",
     "dotenv": "^8.2.0",
